@@ -147,7 +147,7 @@
                 inputFile.onchange = (e) => this.handler(e.target.files[0]);
 
                 const copyButton = document.createElement('button');
-                copyButton.textContent = '一键复制';
+                copyButton.textContent = 'copy';
                 copyButton.classList.add('copy-button');
                 copyButton.onclick = () => this.copyToClipboard();
 
@@ -177,7 +177,7 @@
 
         class Bin2Cbuffer extends Tool {
             constructor() {
-                super('Bin2Cbuffer', 'bin2c-preview', (file) => this.convertFile(file));
+                super('Bin2C', 'bin2c-preview', (file) => this.convertFile(file));
             }
 
             convertFile(file) {
@@ -213,7 +213,7 @@
 
         class Cbuffer2Binfile extends Tool {
             constructor() {
-                super('Cbuffer2Binfile', 'cbuffer2bin-preview', (file) => this.convertFile(file));
+                super('C2bin', 'cbuffer2bin-preview', (file) => this.convertFile(file));
             }
 
             convertFile(file) {
@@ -266,7 +266,7 @@
 
         class PngToWebP extends Tool {
             constructor() {
-                super('PNG 转 WebP 并编码为Base64', 'base64-output', (file) => this.convertFile(file));
+                super('PNG Base64', 'base64-output', (file) => this.convertFile(file));
             }
 
             generateUI() {
@@ -283,7 +283,7 @@
                 inputFile.onchange = (e) => this.convertFile(e.target.files[0]);
 
                 const copyButton = document.createElement('button');
-                copyButton.textContent = '一键复制';
+                copyButton.textContent = 'copy';
                 copyButton.classList.add('copy-button');
                 copyButton.onclick = () => this.copyToClipboard();
 
@@ -323,12 +323,7 @@
                             const webPReader = new FileReader();
                             webPReader.onload = () => {
                                 const base64String = webPReader.result.split(',')[1];
-                                document.getElementById(this.previewId).textContent = base64String;
-
-                                const downloadLink = document.createElement('a');
-                                downloadLink.href = `data:image/webp;base64,${base64String}`;
-                                downloadLink.download = 'image.webp';
-                                downloadLink.click();
+                                document.getElementById(this.previewId).textContent = `data:image/webp;base64,${base64String}`; 
                             };
                             webPReader.readAsDataURL(blob);
                         }, 'image/webp');
