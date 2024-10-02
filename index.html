@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>嵌入式软件工具集合</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background: #333;
+            color: #fff;
+            padding: 1rem 0;
+            text-align: center;
+        }
+
+        nav {
+            display: flex; /* 使用 Flexbox 排版 */
+            justify-content: center; /* 水平居中对齐 */
+            padding: 10px 0; /* 上下内边距 */
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px; /* 左右间距 */
+            padding: 5px 10px; /* 内边距 */
+            border-radius: 5px; /* 圆角效果 */
+            transition: background-color 0.3s; /* 动画效果 */
+        }
+
+        nav a:hover {
+            background-color: #0056b3; /* 悬停时背景色 */
+        }
+
+        main {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        section {
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        textarea, input[type="file"] {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .preview {
+            border: 1px solid #ddd;
+            padding: 10px;
+            background: #f9f9f9;
+            white-space: pre-wrap;
+            font-family: 'Courier New', Courier, monospace;
+            max-height: 300px;
+            overflow-y: auto; /* Enable scrolling for long previews */
+            position: relative;
+        }
+
+        .copy-button {
+            background: #007BFF;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+            margin-left: 10px; /* Add some space between file input and button */
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background: #333;
+            color: #fff;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px 0;
+        }
+
+        .file-input-container {
+            display: flex;
+            align-items: center; /* Center items vertically */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>嵌入式软件工具集合</h1>
+        <nav id="navigation"></nav>
+    </header>
+    <main id="content"></main>
+    <footer>
+        <p>&copy; 2024 嵌入式工具网站. 保留所有权利.</p>
+    </footer>
+    <script src="zlib.js"></script>
+    <script src="png.js"></script>
+    <script>
+        
+        class Tool {
+            constructor(name, previewId, handler) {
+                this.name = name;
+                this.previewId = previewId;
+                this.handler = handler;
+            }
+
+            generateUI() {
+                const section = document.createElement('section');
+                const title = document.createElement('h2');
+                title.textContent = this.name;
+
+                const fileInputContainer = document.createElement('div');
+                fileInputContainer.classList.add('file-input-container');
+
+                const inputFile = document.createElement('input');
+                inputFile.type = 'file';
+                inputFile.onchange = (e) => this.handler(e.target.files[0]);
+
+                const copyButton = document.createElement('button');
+                copyButton.textContent = '一键复制';
+                copyButton.classList.add('copy-button');
+                copyButton.onclick = () => this.copyToClipboard();
+
+                fileInputContainer.appendChild(inputFile);
+                fileInputContainer.appendChild(copyButton);
+
+                const preview = document.createElement('div');
+                preview.id = this.previewId;
+                preview.classList.add('preview');
+
+                section.appendChild(title);
+                section.appendChild(fileInputContainer);
+                section.appendChild(preview);
+
+                return section;
+            }
+
+            copyToClipboard() {
+                const text = document.getElementById(this.previewId).textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('复制成功');
+                }, (err) => {
+                    alert('复制失败');
+                });
+            }
+        }
+
+        class Bin2Cbuffer extends Tool {
+            constructor() {
+                super('Bin2Cbuffer', 'bin2c-preview', (file) => this.convertFile(file));
+            }
+
+            convertFile(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const arrayBuffer = e.target.result;
+                    const bytes = new Uint8Array(arrayBuffer);
+                    let result = `const unsigned char buffer[] = {`;
+                    for (let i = 0; i < bytes.length; i++) {
+                        result += ` 0x${bytes[i].toString(16).padStart(2, '0')}`;
+                        if (i < bytes.length - 1) {
+                            result += ',';
+                        }
+                        if (i === 5) result += '\n';
+                        if ((i + 1) % 12 === 0) result += '\n';
+                    }
+                    result += ' };';
+
+                    document.getElementById(this.previewId).textContent = result;
+
+                    const downloadLink = document.createElement('a');
+                    const newFileName = file.name.split('.').slice(0, -1).join('.') + '.c';
+                    const blob = new Blob([result], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    downloadLink.href = url;
+                    downloadLink.download = newFileName;
+                    downloadLink.click();
+                    URL.revokeObjectURL(url);
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        class Cbuffer2Binfile extends Tool {
+            constructor() {
+                super('Cbuffer2Binfile', 'cbuffer2bin-preview', (file) => this.convertFile(file));
+            }
+
+            convertFile(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const text = e.target.result;
+
+                    if (!file.name.endsWith('.c')) {
+                        alert('请上传以 .c 结尾的文件！');
+                        return;
+                    }
+
+                    const cleanedText = text.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+
+                    const regex = /const\s+(?:uint8_t|unsigned\s+char)\s+(\w+)\s*\[\s*\d*\s*\]\s*=\s*{([^}]*)}/g;
+                    const matches = [...cleanedText.matchAll(regex)];
+
+                    if (matches.length === 0) {
+                        alert('文件中未找到有效的 uint8_t 数组！');
+                        return;
+                    }
+
+                    const bytes = [];
+                    matches.forEach(match => {
+                        const byteValues = match[2].split(',').map(b => parseInt(b.trim(), 16));
+                        bytes.push(...byteValues);
+                    });
+
+                    const blob = new Blob([new Uint8Array(bytes)], { type: 'application/octet-stream' });
+                    const url = URL.createObjectURL(blob);
+
+                    const downloadLink = document.createElement('a');
+                    const newFileName = file.name.split('.').slice(0, -1).join('.') + '.bin';
+                    downloadLink.href = url;
+                    downloadLink.download = newFileName;
+                    downloadLink.click();
+                    URL.revokeObjectURL(url);
+
+                    // Display hex preview
+                    let hexPreview = '';
+                    bytes.forEach((byte, i) => {
+                        hexPreview += byte.toString(16).padStart(2, '0') + ' ';
+                        if ((i + 1) % 16 === 0) hexPreview += '\n';
+                    });
+                    document.getElementById(this.previewId).textContent = hexPreview.trim();
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        class PngToWebP extends Tool {
+            constructor() {
+                super('PNG 转 WebP 并编码为Base64', 'base64-output', (file) => this.convertFile(file));
+            }
+
+            generateUI() {
+                const section = document.createElement('section');
+                const title = document.createElement('h2');
+                title.textContent = this.name;
+
+                const fileInputContainer = document.createElement('div');
+                fileInputContainer.classList.add('file-input-container');
+
+                const inputFile = document.createElement('input');
+                inputFile.type = 'file';
+                inputFile.accept = 'image/png';
+                inputFile.onchange = (e) => this.convertFile(e.target.files[0]);
+
+                const copyButton = document.createElement('button');
+                copyButton.textContent = '一键复制';
+                copyButton.classList.add('copy-button');
+                copyButton.onclick = () => this.copyToClipboard();
+
+                fileInputContainer.appendChild(inputFile);
+                fileInputContainer.appendChild(copyButton);
+
+                const preview = document.createElement('img');
+                preview.id = 'png-preview';
+                preview.alt = 'PNG 预览';
+                preview.src = "image.webp"; 
+
+                const outputPreview = document.createElement('div');
+                outputPreview.id = this.previewId;
+                outputPreview.classList.add('preview');
+
+                section.appendChild(title);
+                section.appendChild(fileInputContainer);
+                section.appendChild(preview);
+                section.appendChild(outputPreview);
+
+                return section;
+            }
+
+            convertFile(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image(); 
+                    img.onload = () => {
+                        document.getElementById('png-preview').src = img.src; 
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        PNG.load(img.src, canvas);     
+                        canvas.toBlob((blob) => {
+                            const webPReader = new FileReader();
+                            webPReader.onload = () => {
+                                const base64String = webPReader.result.split(',')[1];
+                                document.getElementById(this.previewId).textContent = base64String;
+
+                                const downloadLink = document.createElement('a');
+                                downloadLink.href = `data:image/webp;base64,${base64String}`;
+                                downloadLink.download = 'image.webp';
+                                downloadLink.click();
+                            };
+                            webPReader.readAsDataURL(blob);
+                        }, 'image/webp');
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        const tools = [
+            new Bin2Cbuffer(),
+            new Cbuffer2Binfile(),
+            new PngToWebP(),
+        ];
+
+        // Generate navigation links and content
+        const nav = document.getElementById('navigation');
+        const content = document.getElementById('content');
+
+        tools.forEach(tool => {
+            const link = document.createElement('a');
+            link.href = `#${tool.name.replace(/\s+/g, '-').toLowerCase()}`;
+            link.textContent = tool.name;
+            nav.appendChild(link);
+
+            const section = tool.generateUI();
+            section.id = tool.name.replace(/\s+/g, '-').toLowerCase();
+            content.appendChild(section);
+        });
+    </script>
+</body>
+</html>
