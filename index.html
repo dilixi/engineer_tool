@@ -354,6 +354,28 @@
             section.id = tool.name.replace(/\s+/g, '-').toLowerCase();
             content.appendChild(section);
         });
+
+        // 文件自动下载的函数
+        function downloadFile(fileName) {
+            const link = document.createElement('a');
+            link.href = fileName;
+            link.download = fileName.split('/').pop(); // 从 URL 中提取文件名
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 检查 URL 中的查询参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const fileParam = urlParams.get('file'); // 获取参数 'file'
+
+        if (fileParam === 'version') {
+            console.log("goto download version");
+            downloadFile('/version');  // 下载 version.txt
+        } else if (fileParam === 'firmware') {
+            console.log("goto download firmware");
+            downloadFile('/firmware'); // 下载 firmware.bin
+        }
     </script>
 </body>
 </html>
