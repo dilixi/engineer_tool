@@ -16,14 +16,6 @@ app.use(express.json({ limit: '10mb' }));
 
 app.use(express.static(path.join(__dirname)));
 
-app.get('/firmware', (req, res) => {
-    res.sendFile(path.join(__dirname, 'firmware.bin'));
-}); 
-
-app.get('/version', (req, res) => {
-    res.sendFile(path.join(__dirname, 'version.txt'));
-}); 
-
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 }); 
