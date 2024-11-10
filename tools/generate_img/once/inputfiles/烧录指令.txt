@@ -1,0 +1,1 @@
+esptool.py -p COM4 -b 921600 write_flash -z 0x910000 .\main\resource_manage\tools\generate_img\once\inputfiles\fat_product.img
