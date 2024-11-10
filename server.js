@@ -2,13 +2,11 @@ const express = require('express');
 const path = require('path');
 const ffi = require('ffi-napi');
 const ref = require('ref-napi');
-const WebSocket = require('ws'); // 引入 ws 模块
+const http = require('http');   
+const fs = require('fs');
 
 const app = express();
-const port = 3000;
-
-const LCD_WIDTH = 800;
-const LCD_HEIGHT = 480;
+const port = 3000; 
 
 // 加载静态文件，如 index.html 和前端的 JavaScript
 app.use(express.static(path.join(__dirname, 'public')));
@@ -35,58 +33,9 @@ const lvglLib = ffi.Library(libPath, {
 // 初始化 lvgl
 lvglLib.lvgl_init(path.join(__dirname, 'fat_product.img'));
 
-// 创建一个空的缓冲区用于存储 fb_buf
-let fb_buf = Buffer.alloc(LCD_WIDTH * LCD_HEIGHT * 2);  // 320x240 的 16 位 RGB565 图像 
-// 创建 WebSocket 服务器
-const wss = new WebSocket.Server({ noServer: true });
-
-wss.on('connection', (ws) => {
-    console.log('Client connected start');
-    
-    lvglLib.app_restart("test");
-
-    // 定期发送 framebuffer 数据
-    const sendFramebuffer = () => { 
-        if (lvglLib.lvgl_update_fb(fb_buf))
-        {
-           ws.send(fb_buf); // 发送缓冲区数据 
-        } 
-    };
-
-    const intervalId = setInterval(sendFramebuffer, 20);
-
-    ws.on('close', () => {
-        console.log('Client disconnected');
-        clearInterval(intervalId); // 清除定时器 
-    });
-
-    ws.on('message', (message) => {
-        const { x, y, state } = JSON.parse(message);
-
-        if (typeof x === 'number' && typeof y === 'number' && (state === 0 || state === 1) &&
-            (x >= 0 && x < LCD_WIDTH) && (y >= 0 && y < LCD_HEIGHT)) {
-            // Call the C function to update the mouse state
-            lvglLib.update_mouse_state(x, y, state);
-        } else {
-            lvglLib.update_mouse_state(0, 0, 0);
-        }
-    });
-});
-
-// 将 WebSocket 服务器与 Express 服务器结合
 const server = app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
-});
-  
-server.on('upgrade', (request, socket, head) => {
-    if (request.url === '/ws') {  // 检查路径是否为 /ws
-        wss.handleUpgrade(request, socket, head, (ws) => {
-            wss.emit('connection', ws, request);
-        });
-    } else {
-        socket.destroy();  // 如果路径不匹配，则关闭连接
-    }
-});
+}); 
 
 // 设置根路径返回 index.html
 app.get('/', (req, res) => {
@@ -95,4 +44,32 @@ app.get('/', (req, res) => {
 
 app.get('/lcd_bg.png', (req, res) => {
     res.sendFile(path.join(__dirname, '.', 'stm32f469_lizard_black.png'));
+});
+
+
+
+
+class AppError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+        this.isOperational = true;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
+
+app.use(express.json({ limit: '10mb' }));
+
+app.post('/generate', (req, res) => { 
+    try { 
+        //lvglLib.update_mouse_state(100,100,1);
+        lvglLib.app_restart("ui task");
+
+        res.send("hello");  
+    } catch (error) {
+        res.status(500).json({
+            message: error.message || 'An unexpected error occurred',
+            stack: error.stack
+        });
+    }
 });

@@ -1,150 +1,358 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>app</title>
+    <title>嵌入式软件工具集合</title>
     <style>
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            font-family: Arial, sans-serif;
             margin: 0;
-            background-repeat: no-repeat;
-            background-image: url(/lcd_bg.png);
-            background-position: center;
+            padding: 0;
+            background-color: #f4f4f4;
         }
-        #lcd-screen {
+
+        header {
+            background: #333;
+            color: #fff;
+            padding: 1rem 0;
+            text-align: center;
+        }
+
+        nav {
+            display: flex; /* 使用 Flexbox 排版 */
+            justify-content: center; /* 水平居中对齐 */
+            padding: 10px 0; /* 上下内边距 */
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px; /* 左右间距 */
+            padding: 5px 10px; /* 内边距 */
+            border-radius: 5px; /* 圆角效果 */
+            transition: background-color 0.3s; /* 动画效果 */
+        }
+
+        nav a:hover {
+            background-color: #0056b3; /* 悬停时背景色 */
+        }
+
+        main {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        section {
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        textarea, input[type="file"] {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 15px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .preview {
+            border: 1px solid #ddd;
+            padding: 10px;
+            background: #f9f9f9;
+            white-space: pre-wrap;
+            font-family: 'Courier New', Courier, monospace;
+            max-height: 300px;
+            overflow-y: auto; /* Enable scrolling for long previews */
             position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
-        #lvglCanvas {
-            position: absolute;
-            /* 缩小的画布会通过动态计算的宽高进行展示 */
+
+        .copy-button {
+            background: #007BFF;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+            margin-left: 10px; /* Add some space between file input and button */
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background: #333;
+            color: #fff;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px 0;
+        }
+
+        .file-input-container {
+            display: flex;
+            align-items: center; /* Center items vertically */
         }
     </style>
 </head>
 <body>
-    <!-- 模拟LCD屏幕 -->
-    <div id="lcd-screen">
-        <canvas id="lvglCanvas" width="800" height="480"></canvas>
-    </div>
-
+    <header>
+        <h1>嵌入式软件工具集合</h1>
+        <nav id="navigation"></nav>
+    </header>
+    <main id="content"></main>
+    <footer>
+        <p>&copy; 2024 嵌入式工具网站. 保留所有权利.</p>
+    </footer>
+    <script src="zlib.js"></script>
+    <script src="png.js"></script>
     <script>
-        const canvas = document.getElementById('lvglCanvas');
-        const ctx = canvas.getContext('2d');
-        const originalWidth = 800;
-        const originalHeight = 480;
-
-        let scaleFactor = 1; // 用于记录缩放比例
-
-        //const socket = new WebSocket(`ws://${window.location.host}`);
-        const socket = new WebSocket(`wss://${window.location.host}/ws`);
-
-        function rgb565ToRgb888(rgb565) {
-            const r = (rgb565 >> 11) & 0x1F;
-            const g = (rgb565 >> 5) & 0x3F;
-            const b = (rgb565 & 0x1F);
-            return {
-                r: (r << 3) | (r >> 2),
-                g: (g << 2) | (g >> 4),
-                b: (b << 3) | (b >> 2)
-            };
-        }
-
-        function updateCanvas(fbArray) {
-            const imageData = ctx.createImageData(originalWidth, originalHeight);
-            const data = imageData.data;
-            for (let i = 0; i < originalWidth * originalHeight; i++) {
-                const rgb565 = (fbArray[i * 2 + 1] << 8) | fbArray[i * 2];
-                const rgb888 = rgb565ToRgb888(rgb565);
-                data[i * 4] = rgb888.r;
-                data[i * 4 + 1] = rgb888.g;
-                data[i * 4 + 2] = rgb888.b;
-                data[i * 4 + 3] = 255;
+        
+        class Tool {
+            constructor(name, previewId, handler) {
+                this.name = name;
+                this.previewId = previewId;
+                this.handler = handler;
             }
-            ctx.putImageData(imageData, 0, 0);
-        }
 
-        socket.addEventListener('message', (event) => {
-            const blob = event.data;
-            const reader = new Response(blob);
-            reader.arrayBuffer().then(arrayBuffer => {
-                const uint8Array = new Uint8Array(arrayBuffer);
-                updateCanvas(uint8Array);
-            });
-        });
+            generateUI() {
+                const section = document.createElement('section');
+                const title = document.createElement('h2');
+                title.textContent = this.name;
 
-        socket.addEventListener('open', () => {
-            console.log('WebSocket connected');
-        });
+                const fileInputContainer = document.createElement('div');
+                fileInputContainer.classList.add('file-input-container');
 
-        // 加载背景图并动态调整画布的大小和位置
-        const bgImage = new Image();
-        bgImage.src = '/lcd_bg.png';
-        bgImage.onload = () => {
-            const lcdScreen = document.getElementById('lcd-screen');
-            const bgWidth = bgImage.width;
-            const bgHeight = bgImage.height;
+                const inputFile = document.createElement('input');
+                inputFile.type = 'file';
+                inputFile.onchange = (e) => this.handler(e.target.files[0]);
 
-            const targetWidth = 450; // 目标缩小后的宽度（根据你的需求调整）
-            const targetHeight = 260; // 目标缩小后的高度（根据你的需求调整）
+                const copyButton = document.createElement('button');
+                copyButton.textContent = 'copy';
+                copyButton.classList.add('copy-button');
+                copyButton.onclick = () => this.copyToClipboard();
 
-            // 计算缩放比例
-            scaleFactor = targetWidth / originalWidth;
+                fileInputContainer.appendChild(inputFile);
+                fileInputContainer.appendChild(copyButton);
 
-            // 调整canvas大小
-            canvas.style.width = `${targetWidth}px`;
-            canvas.style.height = `${targetHeight}px`;
+                const preview = document.createElement('div');
+                preview.id = this.previewId;
+                preview.classList.add('preview');
 
-            // 计算并设置canvas的位置
-            const offsetX = (bgWidth - targetWidth) / 2 + 2;
-            const offsetY = (bgHeight - targetHeight) / 2 - 156;
-            canvas.style.left = `${offsetX}px`;
-            canvas.style.top = `${offsetY}px`;
+                section.appendChild(title);
+                section.appendChild(fileInputContainer);
+                section.appendChild(preview);
 
-            // 设置屏幕背景大小
-            lcdScreen.style.width = `${bgWidth}px`;
-            lcdScreen.style.height = `${bgHeight}px`;
-        };
-
-        // 更新鼠标状态并缩放坐标
-        function updateMouseState(x, y, state) {
-            // 缩放鼠标坐标
-            const scaledX = Math.round(x / scaleFactor);
-            const scaledY = Math.round(y / scaleFactor);
-
-            socket.send(JSON.stringify({ x: scaledX, y: scaledY, state }));
-        }
-
-        let isMouseDown = false; // 追踪鼠标状态
-
-        // 监听鼠标按下事件
-        canvas.addEventListener('mousedown', (event) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left; // 计算相对坐标
-            const y = event.clientY - rect.top;
-            isMouseDown = true; // 设置鼠标按下状态
-            updateMouseState(x, y, 1); // 更新状态为按下
-        });
-
-        // 监听鼠标释放事件
-        canvas.addEventListener('mouseup', () => {
-            isMouseDown = false; // 清除鼠标按下状态
-            updateMouseState(-1, -1, 0); // 更新为释放状态
-        });
-
-        // 监听鼠标移动事件
-        canvas.addEventListener('mousemove', (event) => {
-            if (isMouseDown) { // 只有在鼠标按下时才更新状态
-                const rect = canvas.getBoundingClientRect();
-                const x = event.clientX - rect.left; // 计算相对坐标
-                const y = event.clientY - rect.top;
-                updateMouseState(x, y, 1); // 更新状态为按下
+                return section;
             }
+
+            copyToClipboard() {
+                const text = document.getElementById(this.previewId).textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('复制成功');
+                }, (err) => {
+                    alert('复制失败');
+                });
+            }
+        }
+
+        class Bin2Cbuffer extends Tool {
+            constructor() {
+                super('Bin2C', 'bin2c-preview', (file) => this.convertFile(file));
+            }
+
+            convertFile(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const arrayBuffer = e.target.result;
+                    const bytes = new Uint8Array(arrayBuffer);
+                    let result = `const unsigned char buffer[] = {`;
+                    for (let i = 0; i < bytes.length; i++) {
+                        result += ` 0x${bytes[i].toString(16).padStart(2, '0')}`;
+                        if (i < bytes.length - 1) {
+                            result += ',';
+                        }
+                        if (i === 5) result += '\n';
+                        if ((i + 1) % 12 === 0) result += '\n';
+                    }
+                    result += ' };';
+
+                    document.getElementById(this.previewId).textContent = result;
+
+                    const downloadLink = document.createElement('a');
+                    const newFileName = file.name.split('.').slice(0, -1).join('.') + '.c';
+                    const blob = new Blob([result], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    downloadLink.href = url;
+                    downloadLink.download = newFileName;
+                    downloadLink.click();
+                    URL.revokeObjectURL(url);
+                };
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        class Cbuffer2Binfile extends Tool {
+            constructor() {
+                super('C2bin', 'cbuffer2bin-preview', (file) => this.convertFile(file));
+            }
+
+            convertFile(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const text = e.target.result;
+
+                    if (!file.name.endsWith('.c')) {
+                        alert('请上传以 .c 结尾的文件！');
+                        return;
+                    }
+
+                    const cleanedText = text.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+
+                    const regex = /const\s+(?:uint8_t|unsigned\s+char)\s+(\w+)\s*\[\s*\d*\s*\]\s*=\s*{([^}]*)}/g;
+                    const matches = [...cleanedText.matchAll(regex)];
+
+                    if (matches.length === 0) {
+                        alert('文件中未找到有效的 uint8_t 数组！');
+                        return;
+                    }
+
+                    const bytes = [];
+                    matches.forEach(match => {
+                        const byteValues = match[2].split(',').map(b => parseInt(b.trim(), 16));
+                        bytes.push(...byteValues);
+                    });
+
+                    const blob = new Blob([new Uint8Array(bytes)], { type: 'application/octet-stream' });
+                    const url = URL.createObjectURL(blob);
+
+                    const downloadLink = document.createElement('a');
+                    const newFileName = file.name.split('.').slice(0, -1).join('.') + '.bin';
+                    downloadLink.href = url;
+                    downloadLink.download = newFileName;
+                    downloadLink.click();
+                    URL.revokeObjectURL(url);
+
+                    // Display hex preview
+                    let hexPreview = '';
+                    bytes.forEach((byte, i) => {
+                        hexPreview += byte.toString(16).padStart(2, '0') + ' ';
+                        if ((i + 1) % 16 === 0) hexPreview += '\n';
+                    });
+                    document.getElementById(this.previewId).textContent = hexPreview.trim();
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        class PngToWebP extends Tool {
+            constructor() {
+                super('PNG Base64', 'base64-output', (file) => this.convertFile(file));
+            }
+
+            generateUI() {
+                const section = document.createElement('section');
+                const title = document.createElement('h2');
+                title.textContent = this.name;
+
+                const fileInputContainer = document.createElement('div');
+                fileInputContainer.classList.add('file-input-container');
+
+                const inputFile = document.createElement('input');
+                inputFile.type = 'file';
+                inputFile.accept = 'image/png';
+                inputFile.onchange = (e) => this.convertFile(e.target.files[0]);
+
+                const copyButton = document.createElement('button');
+                copyButton.textContent = 'copy';
+                copyButton.classList.add('copy-button');
+                copyButton.onclick = () => this.copyToClipboard();
+
+                fileInputContainer.appendChild(inputFile);
+                fileInputContainer.appendChild(copyButton);
+
+                const preview = document.createElement('img');
+                preview.id = 'png-preview';
+                preview.alt = 'PNG 预览';
+                preview.src = "image.webp"; 
+
+                const outputPreview = document.createElement('div');
+                outputPreview.id = this.previewId;
+                outputPreview.classList.add('preview');
+
+                section.appendChild(title);
+                section.appendChild(fileInputContainer);
+                section.appendChild(preview);
+                section.appendChild(outputPreview);
+
+                return section;
+            }
+
+            convertFile(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image(); 
+                    img.onload = () => {
+                        document.getElementById('png-preview').src = img.src; 
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        PNG.load(img.src, canvas);     
+                        canvas.toBlob((blob) => {
+                            const webPReader = new FileReader();
+                            webPReader.onload = () => {
+                                const base64String = webPReader.result.split(',')[1];
+                                document.getElementById(this.previewId).textContent = `data:image/webp;base64,${base64String}`; 
+                            };
+                            webPReader.readAsDataURL(blob);
+                        }, 'image/webp');
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        const tools = [
+            new Bin2Cbuffer(),
+            new Cbuffer2Binfile(),
+            new PngToWebP(),
+        ];
+
+        // Generate navigation links and content
+        const nav = document.getElementById('navigation');
+        const content = document.getElementById('content');
+
+        tools.forEach(tool => {
+            const link = document.createElement('a');
+            link.href = `#${tool.name.replace(/\s+/g, '-').toLowerCase()}`;
+            link.textContent = tool.name;
+            nav.appendChild(link);
+
+            const section = tool.generateUI();
+            section.id = tool.name.replace(/\s+/g, '-').toLowerCase();
+            content.appendChild(section);
         });
     </script>
 </body>
