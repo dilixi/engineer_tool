@@ -3,356 +3,376 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>嵌入式软件工具集合</title>
+    <link rel='shortcut icon' type='image/x-icon' href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAH3SURBVDhPjZP7S1NhGMf3LwX+CdkMKSoI+rUSIvtBWRaE0XXMITq0WoRzyzRy67ataIFTN9O2HMHMbeRl6+w4z3bczrYE3aVJ39737cQu5wR+4MBze7/PeS+PBi2s3b6L1ORz2auTfDKG7zf6Za+OQiB08jQ2jYPMjvVdR1TXx+z44BC+nj3H7EaaBLZsE4j26iDYHUi/dSLtdCHjciP9xglh2oFoj47VNNIksLsawcKRNgSPHcduJIqf4RUE2rWoSnkE2ztYjtY0otgC99CMfS5JFocROKrFcucJFJdDLEZzrSgEtqxPwY/bmM1bbdh+Yf9rkxjNtaIQoKxevoKVC12QFpcg+fwIn7/IYmqoClSyWfx4ZEZu3oecdxaJkVEWU0NVYI/jkBh9gJx/gYjMIz5sImfAydlm1P9AkrBhGIDgeEmuz471+3pUC3k524xCoCLuYP3OPfCWccSHTEiYRpAcsyBGHlQpyctVdRQCVdK9nNpGpKeXvcLY1WvsAH8VizgoleSqOqpboOzFEygLafIJ2Ffp/I//ChwWjfDqNbIzXuQ/LSI3Owfx3Xuknk1B/OBBxulGIRBkcyGRPG+xMpvOB11TEUVo6IjS6ft2qZs9nt+1GqSlz+QWjMxfu3kLoVNnWDfR8xFfOjrBmR9jc8CIDb0BfwD8apdGwrf2kwAAAABJRU5ErkJggg==" />
+    <title>PandaTouch IMG</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
+            font-family: Arial, sans-serif; 
+            color: #333;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 8px; 
+            position: relative;
         }
-
-        header {
-            background: #333;
-            color: #fff;
-            padding: 1rem 0;
+        #langSelector {
+            position: absolute;
+            top: -20px;
+            right: 20px;
+            width: 120px; /* 固定宽度 */
+            
+        }
+        h1 {
             text-align: center;
+            font-size: 24px;
         }
-
-        nav {
-            display: flex; /* 使用 Flexbox 排版 */
-            justify-content: center; /* 水平居中对齐 */
-            padding: 10px 0; /* 上下内边距 */
+        label {
+            margin-top: 20px;
+            display: block;
         }
-
-        nav a {
-            color: #fff;
-            text-decoration: none;
-            margin: 0 15px; /* 左右间距 */
-            padding: 5px 10px; /* 内边距 */
-            border-radius: 5px; /* 圆角效果 */
-            transition: background-color 0.3s; /* 动画效果 */
-        }
-
-        nav a:hover {
-            background-color: #0056b3; /* 悬停时背景色 */
-        }
-
-        main {
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        section {
-            background: #fff;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        textarea, input[type="file"] {
+        select, input[type="file"], button {
             width: 100%;
-            margin-bottom: 10px;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
-
         button {
-            padding: 10px 15px;
-            background: #007BFF;
+            background-color: #4CAF50;
             color: white;
-            border: none;
-            border-radius: 5px;
             cursor: pointer;
+            border: none;
+            transition: background-color 0.3s;
+            margin-top: 20px;
         }
-
         button:hover {
-            background: #0056b3;
+            background-color: #45a049;
         }
-
-        .preview {
-            border: 1px solid #ddd;
-            padding: 10px;
-            background: #f9f9f9;
-            white-space: pre-wrap;
-            font-family: 'Courier New', Courier, monospace;
-            max-height: 300px;
-            overflow-y: auto; /* Enable scrolling for long previews */
-            position: relative;
-        }
-
-        .copy-button {
-            background: #007BFF;
-            color: white;
-            padding: 5px 10px;
-            border: none;
-            cursor: pointer;
-            border-radius: 3px;
-            margin-left: 10px; /* Add some space between file input and button */
-        }
-
-        footer {
+        #preview {
+            margin-top: 20px;
+            display: none;
             text-align: center;
-            padding: 10px;
-            background: #333;
-            color: #fff;
-            position: relative;
-            bottom: 0;
-            width: 100%;
         }
-
-        img {
+        #preview img {
             max-width: 100%;
             height: auto;
-            display: block;
-            margin: 10px 0;
         }
-
-        .file-input-container {
-            display: flex;
-            align-items: center; /* Center items vertically */
+        #error-message {
+            color: red;
+            margin-top: 10px;
+            display: none;
+        }
+        #note {
+            margin-top: 20px;
+            font-style: italic;
+            color: #555;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>嵌入式软件工具集合</h1>
-        <nav id="navigation"></nav>
-    </header>
-    <main id="content"></main>
-    <footer>
-        <p>&copy; 2024 嵌入式工具网站. 保留所有权利.</p>
-    </footer>
-    <script src="zlib.js"></script>
-    <script src="png.js"></script>
+    <!-- 语言选择框 -->
+    <select id="langSelector">
+        <option value="en" selected>English</option>
+        <option value="zh">中文</option> 
+        <option value="de">Deutsch</option>
+        <option value="ja">日本語</option>
+        <option value="es">Español</option>
+    </select>
+
+    <h1 id="title">Panda Touch IMG Generate</h1> 
+
+    <label id="ymlLabel" for="imageInput">Select YML file</label>
+    <input type="file" id="ymlFile" accept=".yml">
+ 
+    <label id="pngLabel" for="newPandaInput">Select new_panda png file</label>
+    <input type="file" id="pngFile" accept="image/png">
+
+    <!-- 预览 PNG 文件 -->
+    <div id="preview">
+        <h2 id="previewTitle">预览图片:</h2>
+        <img id="previewImage" alt="PNG 预览">
+    </div>
+
+    <div id="error-message"></div>
+
+    <!-- 新增提示 -->
+    <p id="note">
+        请注意：生成的img文件将配置默认的熊猫PNG，如您此前修改过该PNG，请在此项中再次上传以生成带有您个性化图片的img文件
+    </p>
+
+    <button id="submit">Generate</button>
+    <button id="submit_fat">Generate fat</button>
+    <P>firmware:V1.0.6beta5</P>
+    <div id="output" style="margin-top: 20px;"></div>
+
     <script>
-        
-        class Tool {
-            constructor(name, previewId, handler) {
-                this.name = name;
-                this.previewId = previewId;
-                this.handler = handler;
+        // 语言切换功能
+        const langSelector = document.getElementById('langSelector');
+        const translations = {
+            en: {
+                title: "Panda Touch IMG Generate",
+                ymlLabel: "Select YML file",
+                pngLabel: "Select new_panda png file",
+                previewTitle: "Preview Image",
+                generateButton: "Generate",
+                generateButton_fat: "Generate fat",
+                generateSuccess: "Generate succeeded!",
+                noFilesSelected: "You need to select at least one YML or PNG file",
+                missingPng: "No panda PNG file uploaded, we will use the default panda. Do you want to continue?",
+                missingYml: "No YML file uploaded, we will use the default language pack. Do you want to continue?",
+                imageTooLarge: "Image exceeds allowed dimensions: Width > 280px or Height > 306px",
+                note: "Note: The generated img file will be configured with the default panda PNG. If you have modified the panda image before, please upload it again here to generate an img file with your personalized image."
+            },
+            zh: {
+                title: "Panda Touch IMG 生成器",
+                ymlLabel: "选择YML文件",
+                pngLabel: "选择new_panda PNG文件",
+                previewTitle: "预览图片",
+                generateButton: "生成",
+                generateButton_fat: "生成 fat",
+                generateSuccess: "生成成功！",
+                noFilesSelected: "您需要至少选择一个YML文件或PNG文件",
+                missingPng: "您未上传熊猫PNG文件，我们将为您生成带有默认熊猫的文件，是否继续？",
+                missingYml: "您未上传语言YML文件，我们将使用默认语言包，是否继续？",
+                imageTooLarge: "图片尺寸超出限制：宽度 > 280px 或高度 > 306px",
+                note: "请注意：生成的img文件将配置默认的熊猫PNG，如您此前修改过该PNG，请在此项中再次上传以生成带有您个性化图片的img文件。"
+            },
+            de: {
+                title: "Panda Touch IMG erstellen",
+                ymlLabel: "Wählen Sie die YML-Datei aus",
+                pngLabel: "Wählen Sie die new_panda PNG-Datei aus",
+                previewTitle: "Bildvorschau",
+                generateButton: "Erstellen",
+                generateButton_fat: "Erstellen fat",
+                generateSuccess: "Erstellung erfolgreich!",
+                noFilesSelected: "Sie müssen mindestens eine YML- oder PNG-Datei auswählen",
+                missingPng: "Es wurde keine Panda-PNG-Datei hochgeladen. Wir verwenden den Standard-Panda. Möchten Sie fortfahren?",
+                missingYml: "Es wurde keine YML-Datei hochgeladen. Wir verwenden das Standard-Sprachpaket. Möchten Sie fortfahren?",
+                imageTooLarge: "Bild überschreitet die zulässigen Abmessungen: Breite > 280px oder Höhe > 306px",
+                note: "Bitte beachten Sie: Die generierte IMG-Datei wird mit dem Standard-Panda-PNG konfiguriert. Wenn Sie das Panda-Bild zuvor geändert haben, laden Sie es bitte hier erneut hoch, um eine IMG-Datei mit Ihrem personalisierten Bild zu erstellen."
+            },
+            ja: {
+                title: "パンダタッチIMG生成",
+                ymlLabel: "YMLファイルを選択",
+                pngLabel: "new_panda PNGファイルを選択",
+                previewTitle: "画像プレビュー",
+                generateButton: "生成",
+                generateButton_fat: "生成 fat",
+                generateSuccess: "生成に成功しました！",
+                noFilesSelected: "YMLファイルまたはPNGファイルのいずれかを選択する必要があります",
+                missingPng: "パンダのPNGファイルがアップロードされていません。デフォルトのパンダを使用します。続行しますか？",
+                missingYml: "YMLファイルがアップロードされていません。デフォルトの言語パックを使用します。続行しますか？",
+                imageTooLarge: "画像の寸法が許可されている寸法を超えています：幅 > 280px または 高さ > 306px",
+                note: "注意：生成されたIMGファイルはデフォルトのパンダPNGで構成されます。以前にパンダの画像を変更した場合は、ここで再度アップロードして、パーソナライズされた画像でIMGファイルを生成してください。"
+            },
+            es: {
+                title: "Generar IMG de Panda Touch",
+                ymlLabel: "Seleccionar archivo YML",
+                pngLabel: "Seleccionar archivo new_panda PNG",
+                previewTitle: "Vista previa de la imagen",
+                generateButton: "Generar",
+                generateButton_fat: "Generar fat",
+                generateSuccess: "¡Generación exitosa!",
+                noFilesSelected: "Debe seleccionar al menos un archivo YML o PNG",
+                missingPng: "No se ha subido ningún archivo PNG de panda. Utilizaremos el panda predeterminado. ¿Desea continuar?",
+                missingYml: "No se ha subido ningún archivo YML. Utilizaremos el paquete de idioma predeterminado. ¿Desea continuar?",
+                imageTooLarge: "La imagen supera las dimensiones permitidas: Ancho > 280px o Altura > 306px",
+                note: "Tenga en cuenta: El archivo IMG generado se configurará con el PNG de panda predeterminado. Si ha modificado la imagen de panda antes, cárguela nuevamente aquí para generar un archivo IMG con su imagen personalizada."
             }
+        };
 
-            generateUI() {
-                const section = document.createElement('section');
-                const title = document.createElement('h2');
-                title.textContent = this.name;
-
-                const fileInputContainer = document.createElement('div');
-                fileInputContainer.classList.add('file-input-container');
-
-                const inputFile = document.createElement('input');
-                inputFile.type = 'file';
-                inputFile.onchange = (e) => this.handler(e.target.files[0]);
-
-                const copyButton = document.createElement('button');
-                copyButton.textContent = 'copy';
-                copyButton.classList.add('copy-button');
-                copyButton.onclick = () => this.copyToClipboard();
-
-                fileInputContainer.appendChild(inputFile);
-                fileInputContainer.appendChild(copyButton);
-
-                const preview = document.createElement('div');
-                preview.id = this.previewId;
-                preview.classList.add('preview');
-
-                section.appendChild(title);
-                section.appendChild(fileInputContainer);
-                section.appendChild(preview);
-
-                return section;
-            }
-
-            copyToClipboard() {
-                const text = document.getElementById(this.previewId).textContent;
-                navigator.clipboard.writeText(text).then(() => {
-                    alert('复制成功');
-                }, (err) => {
-                    alert('复制失败');
-                });
-            }
+        // 切换语言文本
+        function updateTextContent(selectedLang) {
+            document.getElementById('title').innerText = translations[selectedLang].title;
+            document.getElementById('ymlLabel').innerText = translations[selectedLang].ymlLabel;
+            document.getElementById('pngLabel').innerText = translations[selectedLang].pngLabel;
+            document.getElementById('previewTitle').innerText = translations[selectedLang].previewTitle;
+            document.getElementById('submit').innerText = translations[selectedLang].generateButton;
+            document.getElementById('submit_fat').innerText = translations[selectedLang].generateButton_fat;
+            document.getElementById('note').innerText = translations[selectedLang].note;
         }
 
-        class Bin2Cbuffer extends Tool {
-            constructor() {
-                super('Bin2C', 'bin2c-preview', (file) => this.convertFile(file));
+        langSelector.addEventListener('change', (event) => {
+            const selectedLang = event.target.value;
+            updateTextContent(selectedLang);
+        });
+
+        // 检查PNG文件的大小
+        function checkImageDimensions(img) {
+            const selectedLang = langSelector.value;
+            const langText = translations[selectedLang];
+
+            if (img.width > 280 || img.height > 306) {
+                const errorMessage = document.getElementById('error-message');
+                errorMessage.innerText = langText.imageTooLarge;
+                errorMessage.style.display = 'block';
+                return false;
             }
-
-            convertFile(file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const arrayBuffer = e.target.result;
-                    const bytes = new Uint8Array(arrayBuffer);
-                    let result = `const unsigned char buffer[] = {`;
-                    for (let i = 0; i < bytes.length; i++) {
-                        result += ` 0x${bytes[i].toString(16).padStart(2, '0')}`;
-                        if (i < bytes.length - 1) {
-                            result += ',';
-                        }
-                        if (i === 5) result += '\n';
-                        if ((i + 1) % 12 === 0) result += '\n';
-                    }
-                    result += ' };';
-
-                    document.getElementById(this.previewId).textContent = result;
-
-                    const downloadLink = document.createElement('a');
-                    const newFileName = file.name.split('.').slice(0, -1).join('.') + '.c';
-                    const blob = new Blob([result], { type: 'text/plain' });
-                    const url = URL.createObjectURL(blob);
-                    downloadLink.href = url;
-                    downloadLink.download = newFileName;
-                    downloadLink.click();
-                    URL.revokeObjectURL(url);
-                };
-                reader.readAsArrayBuffer(file);
-            }
+            return true;
         }
 
-        class Cbuffer2Binfile extends Tool {
-            constructor() {
-                super('C2bin', 'cbuffer2bin-preview', (file) => this.convertFile(file));
-            }
-
-            convertFile(file) {
+        // 预览 PNG 文件并检查大小
+        document.getElementById('pngFile').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.style.display = 'none'; // 隐藏错误信息
+            if (file) {
                 const reader = new FileReader();
-                reader.onload = (e) => {
-                    const text = e.target.result;
-
-                    if (!file.name.endsWith('.c')) {
-                        alert('请上传以 .c 结尾的文件！');
-                        return;
-                    }
-
-                    const cleanedText = text.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
-
-                    const regex = /const\s+(?:uint8_t|unsigned\s+char)\s+(\w+)\s*\[\s*\d*\s*\]\s*=\s*{([^}]*)}/g;
-                    const matches = [...cleanedText.matchAll(regex)];
-
-                    if (matches.length === 0) {
-                        alert('文件中未找到有效的 uint8_t 数组！');
-                        return;
-                    }
-
-                    const bytes = [];
-                    matches.forEach(match => {
-                        const byteValues = match[2].split(',').map(b => parseInt(b.trim(), 16));
-                        bytes.push(...byteValues);
-                    });
-
-                    const blob = new Blob([new Uint8Array(bytes)], { type: 'application/octet-stream' });
-                    const url = URL.createObjectURL(blob);
-
-                    const downloadLink = document.createElement('a');
-                    const newFileName = file.name.split('.').slice(0, -1).join('.') + '.bin';
-                    downloadLink.href = url;
-                    downloadLink.download = newFileName;
-                    downloadLink.click();
-                    URL.revokeObjectURL(url);
-
-                    // Display hex preview
-                    let hexPreview = '';
-                    bytes.forEach((byte, i) => {
-                        hexPreview += byte.toString(16).padStart(2, '0') + ' ';
-                        if ((i + 1) % 16 === 0) hexPreview += '\n';
-                    });
-                    document.getElementById(this.previewId).textContent = hexPreview.trim();
-                };
-                reader.readAsText(file);
-            }
-        }
-
-        class PngToWebP extends Tool {
-            constructor() {
-                super('PNG Base64', 'base64-output', (file) => this.convertFile(file));
-            }
-
-            generateUI() {
-                const section = document.createElement('section');
-                const title = document.createElement('h2');
-                title.textContent = this.name;
-
-                const fileInputContainer = document.createElement('div');
-                fileInputContainer.classList.add('file-input-container');
-
-                const inputFile = document.createElement('input');
-                inputFile.type = 'file';
-                inputFile.accept = 'image/png';
-                inputFile.onchange = (e) => this.convertFile(e.target.files[0]);
-
-                const copyButton = document.createElement('button');
-                copyButton.textContent = 'copy';
-                copyButton.classList.add('copy-button');
-                copyButton.onclick = () => this.copyToClipboard();
-
-                fileInputContainer.appendChild(inputFile);
-                fileInputContainer.appendChild(copyButton);
-
-                const preview = document.createElement('img');
-                preview.id = 'png-preview';
-                preview.alt = 'PNG 预览';
-                preview.src = "image.webp"; 
-
-                const outputPreview = document.createElement('div');
-                outputPreview.id = this.previewId;
-                outputPreview.classList.add('preview');
-
-                section.appendChild(title);
-                section.appendChild(fileInputContainer);
-                section.appendChild(preview);
-                section.appendChild(outputPreview);
-
-                return section;
-            }
-
-            convertFile(file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image(); 
-                    img.onload = () => {
-                        document.getElementById('png-preview').src = img.src; 
-                        const canvas = document.createElement('canvas');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0);
-                        PNG.load(img.src, canvas);     
-                        canvas.toBlob((blob) => {
-                            const webPReader = new FileReader();
-                            webPReader.onload = () => {
-                                const base64String = webPReader.result.split(',')[1];
-                                document.getElementById(this.previewId).textContent = `data:image/webp;base64,${base64String}`; 
-                            };
-                            webPReader.readAsDataURL(blob);
-                        }, 'image/webp');
-                    };
+                const img = new Image();
+                reader.onload = function(e) {
                     img.src = e.target.result;
+                    img.onload = function() {
+                        if (checkImageDimensions(img)) {
+                            document.getElementById('preview').style.display = 'block';
+                            document.getElementById('previewImage').src = e.target.result;
+                        } else {
+                            document.getElementById('pngFile').value = ""; // 清空文件选择
+                        }
+                    };
                 };
                 reader.readAsDataURL(file);
             }
+        });
+
+        // 生成按钮点击事件
+        document.getElementById('submit_fat').addEventListener('click', async () => {
+            const ymlFileInput = document.getElementById('ymlFile');
+            const pngFileInput = document.getElementById('pngFile');
+
+            let proceed = true;
+            const selectedLang = langSelector.value;
+            const langText = translations[selectedLang];
+            let file_name = 'fat.img';
+
+            // 如果没有选择任何文件，提示用户选择文件
+            if (ymlFileInput.files.length === 0 && pngFileInput.files.length === 0) {
+                alert(langText.noFilesSelected);
+                return;
+            }
+
+            // 如果只选择了YML文件，提示用户
+            if (ymlFileInput.files.length > 0 && pngFileInput.files.length === 0) {
+                proceed = confirm(langText.missingPng);
+                file_name = 'fat_default_panda.img';
+            } else if (pngFileInput.files.length > 0 && ymlFileInput.files.length === 0) {
+                proceed = confirm(langText.missingYml);
+                file_name = 'fat_default_yml.img';
+            }
+
+            if (!proceed) {
+                return;
+            }
+
+            const ymlFile = ymlFileInput.files[0] || null;
+            const pngFile = pngFileInput.files[0] || null;
+
+            const ymlData = ymlFile ? await readFileAsBase64(ymlFile) : null;
+            const pngData = pngFile ? await readFileAsBase64(pngFile) : null;
+
+            const response = await fetch('/generate_fat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ymlData: ymlData,
+                    pngData: pngData
+                })
+            });
+
+            const outputDiv = document.getElementById('output');
+            if (response.ok) {
+                const imgArrayBuffer = await response.arrayBuffer();
+                outputDiv.innerHTML = `<p>${langText.generateSuccess}</p>`;
+                downloadImageFromArrayBuffer(imgArrayBuffer, file_name);
+            } else {
+                const result = await response.json();
+                outputDiv.innerHTML = `<p style="color: red;">${result.stack}</p>`;
+            }
+        });
+
+                // 生成按钮点击事件
+            document.getElementById('submit').addEventListener('click', async () => {
+            const ymlFileInput = document.getElementById('ymlFile');
+            const pngFileInput = document.getElementById('pngFile');
+
+            let proceed = true;
+            const selectedLang = langSelector.value;
+            const langText = translations[selectedLang];
+            let file_name = 'addtion.img';
+
+            // 如果没有选择任何文件，提示用户选择文件
+            if (ymlFileInput.files.length === 0 && pngFileInput.files.length === 0) {
+                alert(langText.noFilesSelected);
+                return;
+            }
+
+            // 如果只选择了YML文件，提示用户
+            if (ymlFileInput.files.length > 0 && pngFileInput.files.length === 0) {
+                proceed = confirm(langText.missingPng);
+                file_name = 'addtion_default_panda.img';
+            } else if (pngFileInput.files.length > 0 && ymlFileInput.files.length === 0) {
+                proceed = confirm(langText.missingYml);
+                file_name = 'addtion_default_yml.img';
+            }
+
+            if (!proceed) {
+                return;
+            }
+
+            const ymlFile = ymlFileInput.files[0] || null;
+            const pngFile = pngFileInput.files[0] || null;
+
+            const ymlData = ymlFile ? await readFileAsBase64(ymlFile) : null;
+            const pngData = pngFile ? await readFileAsBase64(pngFile) : null;
+
+            const response = await fetch('/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ymlData: ymlData,
+                    pngData: pngData
+                })
+            });
+
+            const outputDiv = document.getElementById('output');
+            if (response.ok) {
+                const imgArrayBuffer = await response.arrayBuffer();
+                outputDiv.innerHTML = `<p>${langText.generateSuccess}</p>`;
+                downloadImageFromArrayBuffer(imgArrayBuffer, file_name);
+            } else {
+                const result = await response.json();
+                outputDiv.innerHTML = `<p style="color: red;">${result.stack}</p>`;
+            }
+        });
+
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
         }
 
-        const tools = [
-            new Bin2Cbuffer(),
-            new Cbuffer2Binfile(),
-            new PngToWebP(),
-        ];
+        function downloadImageFromArrayBuffer(arrayBuffer, fileName) {
+            const blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
 
-        // Generate navigation links and content
-        const nav = document.getElementById('navigation');
-        const content = document.getElementById('content');
-
-        tools.forEach(tool => {
-            const link = document.createElement('a');
-            link.href = `#${tool.name.replace(/\s+/g, '-').toLowerCase()}`;
-            link.textContent = tool.name;
-            nav.appendChild(link);
-
-            const section = tool.generateUI();
-            section.id = tool.name.replace(/\s+/g, '-').toLowerCase();
-            content.appendChild(section);
+        // 页面加载时根据当前语言初始化文本内容
+        document.addEventListener("DOMContentLoaded", function() {
+            const initialLang = langSelector.value;
+            updateTextContent(initialLang);
         });
     </script>
 </body>
