@@ -77,11 +77,15 @@ wss.on('connection', (ws) => {
 const server = app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
-
+  
 server.on('upgrade', (request, socket, head) => {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-        wss.emit('connection', ws, request);
-    });
+    if (request.url === '/ws') {  // 检查路径是否为 /ws
+        wss.handleUpgrade(request, socket, head, (ws) => {
+            wss.emit('connection', ws, request);
+        });
+    } else {
+        socket.destroy();  // 如果路径不匹配，则关闭连接
+    }
 });
 
 // 设置根路径返回 index.html
