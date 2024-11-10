@@ -41,7 +41,7 @@
 
         let scaleFactor = 1; // 用于记录缩放比例
 
-        const socket = new WebSocket(`ws://${window.location.host}`);
+        const socket = new WebSocket(`wss://${window.location.host}`);
 
         function rgb565ToRgb888(rgb565) {
             const r = (rgb565 >> 11) & 0x1F;
